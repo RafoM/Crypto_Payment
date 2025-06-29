@@ -1,6 +1,6 @@
 # HD Tron Wallet API
 
-This project exposes a simple HTTP API for generating TRC‑20 wallets from a mnemonic and storing them in MySQL.
+This project exposes a simple HTTP API for generating TRC‑20 wallets from a mnemonic name and storing only the public wallet information in MySQL. No mnemonic phrases or private keys are persisted.
 
 ## Requirements
 - Node.js
@@ -25,16 +25,29 @@ npm start
 The server listens on `PORT` (default `3000`).
 
 ## API Usage
-`POST /wallets`
+
+### `POST /mnemonics`
 
 Body parameters:
-- `count` – number of addresses to derive (default `1`)
-- `mnemonic` – optional existing mnemonic. If omitted, a new one is generated.
+- `mnemonic` – BIP39 phrase used to derive wallets
+- `name` – unique identifier for the mnemonic
+- `count` – number of addresses to store
 
-Example request using `curl`:
-```bash
-curl -X POST http://localhost:3000/wallets \
-  -H 'Content-Type: application/json' \
-  -d '{"count":2,"mnemonic":"your mnemonic here"}'
+This endpoint derives `count` wallet addresses from the provided mnemonic and
+saves only the address and index in the database linked to the mnemonic `name`.
+
+### `POST /wallets/:mnemonicName`
+
+Body parameters:
+- `mnemonic` – BIP39 phrase used to reconstruct the wallets
+
+Returns the wallets stored for the given `mnemonicName`. The mnemonic is
+supplied in the request body and used only to derive the private keys in
+memory.
+The response format is:
+
 ```
-The response contains the mnemonic and a list of derived wallets.
+[
+  { "wallet_index": number, "address": string, "privateKey": string }
+]
+```
