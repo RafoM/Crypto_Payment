@@ -29,12 +29,23 @@ The server listens on `PORT` (default `3000`).
 ### `POST /mnemonics`
 
 Body parameters:
-- `mnemonic` – BIP39 phrase used to derive wallets
 - `name` – unique identifier for the mnemonic
+
+Creates a mnemonic entry. The phrase itself is **not** saved.
+
+### `GET /mnemonics`
+
+Returns the list of mnemonic names stored in the database.
+
+### `POST /wallets`
+
+Body parameters:
+- `mnemonic` – BIP39 phrase used to derive wallets
+- `name` – mnemonic name to associate with the generated wallets
 - `count` – number of addresses to store
 
-This endpoint derives `count` wallet addresses from the provided mnemonic and
-saves only the address and index in the database linked to the mnemonic `name`.
+Derives `count` addresses from the mnemonic and saves only their index and
+address in the database linked to `name`.
 
 ### `POST /wallets/:mnemonicName`
 

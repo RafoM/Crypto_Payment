@@ -1,7 +1,7 @@
 const { init } = require('../models/db');
 const { deriveAddresses, deriveWallet } = require('../models/wallet');
 
-async function createMnemonic(req, res) {
+async function generateWallets(req, res) {
   const { mnemonic, name, count } = req.body;
   const cnt = parseInt(count, 10) || 1;
 
@@ -35,6 +35,36 @@ async function createMnemonic(req, res) {
 
     await connection.end();
     res.json({ mnemonicName: name, wallets: wallets.map(w => ({ wallet_index: w.index, address: w.address })) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+async function createMnemonicName(req, res) {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'name is required' });
+  }
+
+  try {
+    const connection = await init();
+    await connection.execute('INSERT IGNORE INTO mnemonics (name) VALUES (?)', [name]);
+    const [rows] = await connection.execute('SELECT id, name FROM mnemonics WHERE name=?', [name]);
+    await connection.end();
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+async function listMnemonics(req, res) {
+  try {
+    const connection = await init();
+    const [rows] = await connection.execute('SELECT id, name FROM mnemonics ORDER BY id');
+    await connection.end();
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
@@ -80,4 +110,9 @@ async function getWallets(req, res) {
   }
 }
 
-module.exports = { createMnemonic, getWallets };
+module.exports = {
+  generateWallets,
+  getWallets,
+  createMnemonicName,
+  listMnemonics,
+};
