@@ -3,8 +3,8 @@ const mysql = require('mysql2/promise');
 async function init() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
+    user: process.env.DB_USER || 'myuser',
+    password: process.env.DB_PASS || 'mysecret',
     database: process.env.DB_NAME || 'wallets_db'
   });
 
