@@ -12,10 +12,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "tronweb": "^4.4.1",
+    "bip32": "^5.0.0-rc.0",
     "bip39": "^3.0.4",
-    "bip32": "^5.2.0",
+    "express": "^4.19.2",
     "mysql2": "^3.2.4",
-    "express": "^4.19.2"
+    "tronweb": "^6.0.3"
   }
 }
