@@ -10,14 +10,14 @@ async function init() {
 
   await connection.execute(`CREATE TABLE IF NOT EXISTS mnemonics (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    phrase VARCHAR(255) UNIQUE
+    name VARCHAR(255) UNIQUE NOT NULL
   )`);
   await connection.execute(`CREATE TABLE IF NOT EXISTS wallets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mnemonic_id INT,
     wallet_index INT,
     address VARCHAR(64),
-    private_key VARCHAR(66),
+    UNIQUE KEY uniq_wallet (mnemonic_id, wallet_index),
     FOREIGN KEY (mnemonic_id) REFERENCES mnemonics(id)
   )`);
   return connection;
