@@ -47,10 +47,11 @@ Body parameters:
 Derives `count` addresses from the mnemonic and saves only their index and
 address in the database linked to `name`.
 
-### `POST /wallets/:mnemonicName`
+### `POST /wallets/retrievePrivateKeys`
 
 Body parameters:
 - `mnemonic` – BIP39 phrase used to reconstruct the wallets
+- `mnemonicName` – identifier of the stored mnemonic
 
 Returns the wallets stored for the given `mnemonicName`. The mnemonic is
 supplied in the request body and used only to derive the private keys in

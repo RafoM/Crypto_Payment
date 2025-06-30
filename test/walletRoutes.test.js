@@ -59,11 +59,14 @@ describe('Wallet API', () => {
   test('get wallets', async () => {
     await request(app)
       .post('/wallets')
-      .send({ mnemonic, name: 'm1'});
+      .send({ mnemonic, name: 'm1', count: 2 });
+
 
     const res = await request(app)
       .post('/wallets/retrievePrivateKeys')
       .send({ mnemonic, mnemonicName: 'm1' });
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(2);
       .send({ mnemonic, mnemonicName: 'm2' });
     expect(res.statusCode).toBe(200);
     expect(res.body[0]).toHaveProperty('wallet_index');

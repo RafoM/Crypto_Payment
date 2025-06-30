@@ -60,7 +60,10 @@ async function getWallets(req, res) {
   }
 
   try {
-    const [mRow] = await Mnemonic.findOrCreate({ where: { name: mnemonicName } });
+    const mRow = await Mnemonic.findOne({ where: { name: mnemonicName } });
+    if (!mRow) {
+      return res.json([]);
+    }
     const walletRows = await Wallet.findAll({
       where: { mnemonic_id: mRow.id },
       order: [['wallet_index', 'ASC']],
@@ -68,7 +71,7 @@ async function getWallets(req, res) {
     });
 
     const result = walletRows.map(r => deriveWallet(mnemonic, r.wallet_index));
-    console.log(result, '1111111');
+
     res.json(result);
   } catch (err) {
     console.error(err);
