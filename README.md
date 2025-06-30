@@ -26,48 +26,118 @@ The server listens on `PORT` (default `3000`).
 
 ## API Usage
 
+The server exposes REST style endpoints. Unless stated otherwise, JSON is both
+accepted and returned. Each section below describes the request body, required
+parameters and the shape of the response. Validation errors return HTTP `400`
+with a JSON object in the form `{ "error": string }`.
+
 ### `POST /mnemonics`
 
-Body parameters:
-- `name` – unique identifier for the mnemonic
+Creates a mnemonic name entry. The mnemonic phrase itself is **never**
+persisted.
 
-Creates a mnemonic entry. The phrase itself is **not** saved.
+**Body**
+
+```json
+{
+  "name": "example-name"
+}
+```
+
+- `name` – required and must be unique.
+
+**Response**
+
+```json
+{ "id": number, "name": string }
+```
 
 ### `GET /mnemonics`
 
-Returns the list of mnemonic names stored in the database.
+Returns an array of stored mnemonic names.
+
+**Response**
+
+```json
+[ { "id": number, "name": string }, ... ]
+```
 
 ### `POST /generate-wallets`
 
-Body parameters:
-- `blockchain` – blockchain on which to generate wallets (e.g. `tron`)
-- `mnemonic` – BIP39 phrase used to derive wallets
-- `name` – mnemonic name to associate with the generated wallets
-- `count` – number of addresses to store
-- `paymentMethodId` – ID of the payment method (blockchain/crypto pair)
+Generate and store wallet addresses.
 
-Derives `count` addresses on the selected blockchain and saves only their index
-and address in the database linked to `name`.
+**Body**
+
+```json
+{
+  "blockchain": "tron",
+  "mnemonic": "bip39 phrase",
+  "name": "mnemonic-name",
+  "count": 2,
+  "paymentMethodId": 1
+}
+```
+
+- `blockchain` – required blockchain identifier (currently only `tron`).
+- `mnemonic` – required BIP39 phrase used for derivation.
+- `name` – required mnemonic name.
+- `count` – optional number of addresses to generate (defaults to `1`).
+- `paymentMethodId` – required existing payment method ID.
+
+If `paymentMethodId` does not exist, a validation error is returned.
+
+**Response**
+
+```json
+{
+  "mnemonicName": string,
+  "paymentMethodId": number,
+  "blockchain": string,
+  "wallets": [
+    { "wallet_index": number, "address": string }
+  ]
+}
+```
 
 ### `GET /wallets`
 
-Returns all stored wallets with associated blockchain and crypto symbols.
+Lists all stored wallets with blockchain and crypto information.
+
+**Response**
+
+```json
+[{
+  "id": number,
+  "mnemonic_id": number,
+  "wallet_index": number,
+  "address": string,
+  "blockchain": string,
+  "crypto": string
+}]
+```
 
 ### `POST /wallets/retrievePrivateKeys`
 
-Body parameters:
-- `mnemonic` – BIP39 phrase used to reconstruct the wallets
-- `mnemonicName` – identifier of the stored mnemonic
+Retrieve private keys for previously stored wallets.
 
-Returns the wallets stored for the given `mnemonicName`. The mnemonic is
-supplied in the request body and used only to derive the private keys in
-memory.
-The response format is:
+**Body**
 
+```json
+{
+  "mnemonic": "bip39 phrase",
+  "mnemonicName": "existing-name"
+}
 ```
-[
-  { "wallet_index": number, "address": string, "privateKey": string }
-]
+
+- `mnemonic` – required; used only in memory to derive the keys.
+- `mnemonicName` – required name of the mnemonic entry.
+
+If the name does not exist an empty array is returned.
+
+**Response**
+
+```json
+[ { "wallet_index": number, "address": string, "privateKey": string } ]
 ```
 
 ## Blockchain & Crypto Management
@@ -84,9 +154,24 @@ Retrieve a single blockchain by ID.
 
 Create a blockchain entry.
 
+**Body**
+
+```json
+{
+  "name": "TRON",
+  "symbol": "TRX",
+  "wallet_generation_supported": true
+}
+```
+
+- `name` and `symbol` are required.
+- `wallet_generation_supported` is optional and defaults to `false`.
+
+**Response** – created blockchain object.
+
 ### `PUT /blockchains/:id`
 
-Update an existing blockchain.
+Update an existing blockchain. Only supplied fields are updated.
 
 ### `DELETE /blockchains/:id`
 
@@ -103,6 +188,16 @@ Retrieve a single crypto by ID.
 ### `POST /cryptos`
 
 Create a crypto entry.
+
+**Body**
+
+```json
+{ "name": "Tether", "symbol": "USDT" }
+```
+
+- Both `name` and `symbol` are required.
+
+**Response** – created crypto object.
 
 ### `PUT /cryptos/:id`
 
@@ -124,7 +219,23 @@ Retrieve a single payment method by ID.
 
 ### `POST /payment-methods`
 
-Create a payment method. Duplicate blockchain/crypto pairs are rejected.
+Create a payment method.
+
+**Body**
+
+```json
+{
+  "blockchain_id": 1,
+  "crypto_id": 1,
+  "status": "active"
+}
+```
+
+- `blockchain_id` and `crypto_id` must reference existing rows and the pair must
+  be unique.
+- `status` defaults to `active`.
+
+**Response** – created payment method object.
 
 ### `PUT /payment-methods/:id`
 
