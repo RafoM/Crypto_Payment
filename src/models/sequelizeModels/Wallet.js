@@ -14,6 +14,7 @@ const Wallet = sequelize.define('Wallet', {
     references: { model: PaymentMethod, key: 'id' },
     allowNull: false,
   },
+  blockchain: DataTypes.STRING,
   wallet_index: DataTypes.INTEGER,
   address: DataTypes.STRING,
 }, {
