@@ -54,7 +54,7 @@ async function listMnemonics(_req, res) {
 
 async function getWallets(req, res) {
   const { mnemonic, mnemonicName } = req.body;
-  console.log(req.body, 111111);
+
   if (!mnemonic) {
     return res.status(400).json({ error: 'mnemonic is required' });
   }
