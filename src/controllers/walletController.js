@@ -53,9 +53,7 @@ async function listMnemonics(_req, res) {
 }
 
 async function getWallets(req, res) {
-  const { mnemonicName } = req.params;
-  const { mnemonic } = req.body;
-
+  const { mnemonic, mnemonicName } = req.body;
   if (!mnemonic) {
     return res.status(400).json({ error: 'mnemonic is required' });
   }
@@ -82,3 +80,5 @@ module.exports = {
   createMnemonicName,
   listMnemonics,
 };
+
+
