@@ -248,3 +248,83 @@ Delete a payment method.
 ### `GET /payment-methods/active`
 
 List active payment methods where the blockchain supports wallet generation.
+## Wallet Assignments
+
+### `GET /wallet-assignments`
+
+List all wallet assignments.
+
+### `GET /wallet-assignments/:id`
+
+Retrieve a wallet assignment.
+
+### `POST /wallet-assignments`
+
+Create a wallet assignment. Useful for manual management.
+
+**Body**
+
+```json
+{
+  "wallet_id": 1,
+  "expected_amount": "10.5",
+  "description": "optional text",
+  "expires_at": "2025-07-01T12:00:00Z"
+}
+```
+
+**Response** – created wallet assignment object.
+
+### `PUT /wallet-assignments/:id`
+
+Update a wallet assignment.
+
+### `DELETE /wallet-assignments/:id`
+
+Remove a wallet assignment.
+
+### `POST /wallet-assignments/request-address`
+
+Request an unused wallet for an active payment method.
+
+**Body**
+
+```json
+{
+  "blockchain": "TRX",
+  "crypto": "USDT",
+  "expected_amount": "10.5",
+  "description": "Invoice #123"
+}
+```
+
+- `blockchain` and `crypto` are required and identify the payment method.
+- `expected_amount` and `description` are optional.
+
+**Response**
+
+```json
+{
+  "wallet_address": "TXYZ...",
+  "expires_at": "2025-07-01T12:30:00Z",
+  "expected_amount": "10.5"
+}
+```
+
+### `GET /wallet-assignments/track/:walletAddress`
+
+Track the status of a wallet assignment.
+
+**Response**
+
+```json
+{
+  "status": "assigned",
+  "assigned_at": "2025-06-30T10:00:00Z",
+  "paid_at": null,
+  "expires_at": "2025-07-01T12:30:00Z"
+}
+```
+
+Expired assignments automatically move to the `expired` status and cannot be reassigned.
+
