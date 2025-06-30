@@ -4,7 +4,7 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const app = require('../src/app');
 const { init, sequelize } = require('../src/models/sequelize');
-const { Mnemonic, Wallet } = require('../src/models/sequelizeModels');
+const { Mnemonic, Wallet, Blockchain, Crypto, PaymentMethod } = require('../src/models/sequelizeModels');
 
 describe('Wallet API', () => {
   beforeAll(async () => {
@@ -17,6 +17,22 @@ describe('Wallet API', () => {
 
   beforeEach(async () => {
     await sequelize.sync({ force: true });
+    global.blockchain = await Blockchain.create({
+      name: 'TRON',
+      symbol: 'TRX',
+      wallet_generation_supported: true,
+      status: 'active',
+    });
+    global.crypto = await Crypto.create({
+      name: 'Tether',
+      symbol: 'USDT',
+      status: 'active',
+    });
+    global.paymentMethod = await PaymentMethod.create({
+      blockchain_id: global.blockchain.id,
+      crypto_id: global.crypto.id,
+      status: 'active',
+    });
   });
 
   test('create mnemonic', async () => {
@@ -47,7 +63,7 @@ describe('Wallet API', () => {
   test('generate wallets', async () => {
     const res = await request(app)
       .post('/wallets')
-      .send({ mnemonic, name: 'm1', count: 2 });
+      .send({ mnemonic, name: 'm1', count: 2, paymentMethodId: global.paymentMethod.id });
     expect(res.statusCode).toBe(200);
     expect(res.body.mnemonicName).toBe('m1');
     expect(res.body.wallets.length).toBe(2);
@@ -59,16 +75,13 @@ describe('Wallet API', () => {
   test('get wallets', async () => {
     await request(app)
       .post('/wallets')
-      .send({ mnemonic, name: 'm1', count: 2 });
-
+      .send({ mnemonic, name: 'm1', count: 2, paymentMethodId: global.paymentMethod.id });
 
     const res = await request(app)
       .post('/wallets/retrievePrivateKeys')
       .send({ mnemonic, mnemonicName: 'm1' });
     expect(res.statusCode).toBe(200);
     expect(res.body.length).toBe(2);
-      .send({ mnemonic, mnemonicName: 'm2' });
-    expect(res.statusCode).toBe(200);
     expect(res.body[0]).toHaveProperty('wallet_index');
     expect(res.body[0]).toHaveProperty('address');
     expect(res.body[0]).toHaveProperty('privateKey');
