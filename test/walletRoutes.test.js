@@ -62,8 +62,8 @@ describe('Wallet API', () => {
 
   test('generate wallets', async () => {
     const res = await request(app)
-      .post('/wallets')
-      .send({ mnemonic, name: 'm1', count: 2, paymentMethodId: global.paymentMethod.id });
+      .post('/generate-wallets')
+      .send({ blockchain: 'tron', mnemonic, name: 'm1', count: 2, paymentMethodId: global.paymentMethod.id });
     expect(res.statusCode).toBe(200);
     expect(res.body.mnemonicName).toBe('m1');
     expect(res.body.wallets.length).toBe(2);
@@ -74,8 +74,8 @@ describe('Wallet API', () => {
 
   test('get wallets', async () => {
     await request(app)
-      .post('/wallets')
-      .send({ mnemonic, name: 'm1', count: 2, paymentMethodId: global.paymentMethod.id });
+      .post('/generate-wallets')
+      .send({ blockchain: 'tron', mnemonic, name: 'm1', count: 2, paymentMethodId: global.paymentMethod.id });
 
     const res = await request(app)
       .post('/wallets/retrievePrivateKeys')

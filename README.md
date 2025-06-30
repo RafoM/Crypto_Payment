@@ -1,6 +1,6 @@
-# HD Tron Wallet API
+# HD Wallet API
 
-This project exposes a simple HTTP API for generating TRC‑20 wallets from a mnemonic name and storing only the public wallet information in MySQL. No mnemonic phrases or private keys are persisted.
+This project exposes a simple HTTP API for generating cryptocurrency wallets from a mnemonic name and storing only the public wallet information in MySQL. No mnemonic phrases or private keys are persisted. Wallet generation logic is modular and currently supports the TRON blockchain.
 
 ## Requirements
 - Node.js
@@ -37,16 +37,17 @@ Creates a mnemonic entry. The phrase itself is **not** saved.
 
 Returns the list of mnemonic names stored in the database.
 
-### `POST /wallets`
+### `POST /generate-wallets`
 
 Body parameters:
+- `blockchain` – blockchain on which to generate wallets (e.g. `tron`)
 - `mnemonic` – BIP39 phrase used to derive wallets
 - `name` – mnemonic name to associate with the generated wallets
 - `count` – number of addresses to store
 - `paymentMethodId` – ID of the payment method (blockchain/crypto pair)
 
-Derives `count` addresses from the mnemonic and saves only their index and
-address in the database linked to `name`.
+Derives `count` addresses on the selected blockchain and saves only their index
+and address in the database linked to `name`.
 
 ### `GET /wallets`
 
