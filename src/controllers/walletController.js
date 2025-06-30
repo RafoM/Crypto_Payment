@@ -1,26 +1,34 @@
 const { deriveAddresses, deriveWallet } = require('../models/wallet');
-const { Mnemonic, Wallet } = require('../models/sequelizeModels');
+const { Mnemonic, Wallet, PaymentMethod, Blockchain, Crypto } = require('../models/sequelizeModels');
 
 async function generateWallets(req, res) {
-  const { mnemonic, name, count } = req.body;
+  const { mnemonic, name, count, paymentMethodId } = req.body;
   const cnt = parseInt(count, 10) || 1;
 
-  if (!mnemonic || !name) {
-    return res.status(400).json({ error: 'mnemonic and name are required' });
+  if (!mnemonic || !name || !paymentMethodId) {
+    return res.status(400).json({ error: 'mnemonic, name and paymentMethodId are required' });
   }
 
   try {
     const [mnemonicRow] = await Mnemonic.findOrCreate({ where: { name } });
+    const pm = await PaymentMethod.findByPk(paymentMethodId);
+    if (!pm) {
+      return res.status(400).json({ error: 'invalid paymentMethodId' });
+    }
     const wallets = deriveAddresses(mnemonic, cnt);
 
     for (const w of wallets) {
       await Wallet.findOrCreate({
         where: { mnemonic_id: mnemonicRow.id, wallet_index: w.index },
-        defaults: { address: w.address },
+        defaults: { address: w.address, payment_method_id: paymentMethodId },
       });
     }
 
-    res.json({ mnemonicName: name, wallets: wallets.map(w => ({ wallet_index: w.index, address: w.address })) });
+    res.json({
+      mnemonicName: name,
+      paymentMethodId,
+      wallets: wallets.map(w => ({ wallet_index: w.index, address: w.address })),
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
@@ -46,6 +54,30 @@ async function listMnemonics(_req, res) {
   try {
     const rows = await Mnemonic.findAll({ order: [['id', 'ASC']], attributes: ['id', 'name'] });
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+async function listWallets(_req, res) {
+  try {
+    const wallets = await Wallet.findAll({
+      include: [{
+        model: PaymentMethod,
+        include: [Blockchain, Crypto],
+      }],
+      order: [['id', 'ASC']],
+    });
+    const result = wallets.map(w => ({
+      id: w.id,
+      mnemonic_id: w.mnemonic_id,
+      wallet_index: w.wallet_index,
+      address: w.address,
+      blockchain: w.PaymentMethod?.Blockchain?.symbol,
+      crypto: w.PaymentMethod?.Crypto?.symbol,
+    }));
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
@@ -84,6 +116,7 @@ module.exports = {
   getWallets,
   createMnemonicName,
   listMnemonics,
+  listWallets,
 };
 
 
