@@ -54,6 +54,7 @@ async function listMnemonics(_req, res) {
 
 async function getWallets(req, res) {
   const { mnemonic, mnemonicName } = req.body;
+
   if (!mnemonic) {
     return res.status(400).json({ error: 'mnemonic is required' });
   }
@@ -67,6 +68,7 @@ async function getWallets(req, res) {
     });
 
     const result = walletRows.map(r => deriveWallet(mnemonic, r.wallet_index));
+    console.log(result, '1111111');
     res.json(result);
   } catch (err) {
     console.error(err);
