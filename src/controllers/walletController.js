@@ -68,6 +68,7 @@ async function getWallets(req, res) {
     });
 
     const result = walletRows.map(r => deriveWallet(mnemonic, r.wallet_index));
+    console.log(result, '1111111');
     res.json(result);
   } catch (err) {
     console.error(err);
