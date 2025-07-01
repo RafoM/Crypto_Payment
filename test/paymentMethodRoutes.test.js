@@ -72,4 +72,20 @@ describe('Payment Method API', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.length).toBe(1);
   });
+
+  test('filter payment methods', async () => {
+    const bc2 = await Blockchain.create({ name: 'ETH', symbol: 'ETH', wallet_generation_supported: true });
+    const cr2 = await Crypto.create({ name: 'Ether', symbol: 'ETH' });
+
+    await PaymentMethod.bulkCreate([
+      { blockchain_id: global.blockchain.id, crypto_id: global.crypto.id, status: 'active' },
+      { blockchain_id: bc2.id, crypto_id: cr2.id, status: 'inactive' },
+    ]);
+
+    const res = await request(app).get(`/admin/payment-methods/filters?blockchainId=${bc2.id}&status=inactive`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(1);
+    expect(res.body[0].blockchain_id).toBe(bc2.id);
+    expect(res.body[0].status).toBe('inactive');
+  });
 });

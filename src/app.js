@@ -6,6 +6,7 @@ const blockchainRoutes = require('./routes/blockchainRoutes');
 const cryptoRoutes = require('./routes/cryptoRoutes');
 const paymentMethodRoutes = require('./routes/paymentMethodRoutes');
 const walletAssignmentRoutes = require('./routes/walletAssignmentRoutes');
+const adminPaymentMethodsRoutes = require('./routes/adminPaymentMethodsRoutes');
 
 const app = express();
 app.use(express.json());
@@ -19,5 +20,6 @@ app.use('/blockchains', blockchainRoutes);
 app.use('/cryptos', cryptoRoutes);
 app.use('/payment-methods', paymentMethodRoutes);
 app.use('/wallet-assignments', walletAssignmentRoutes);
+app.use('/admin', adminPaymentMethodsRoutes);
 
 module.exports = app;
