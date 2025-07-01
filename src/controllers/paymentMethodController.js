@@ -55,4 +55,27 @@ async function listActive(req, res) {
   res.json(rows);
 }
 
-module.exports = { list, get, create, update, remove, listActive };
+async function listFiltered(req, res) {
+  const { blockchainId, cryptoId, status } = req.query;
+  const where = {};
+  if (blockchainId) where.blockchain_id = blockchainId;
+  if (cryptoId) where.crypto_id = cryptoId;
+  if (status) where.status = status;
+
+  const rows = await PaymentMethod.findAll({
+    where,
+    include: [Blockchain, Crypto],
+    order: [['id', 'ASC']],
+  });
+  res.json(rows);
+}
+
+module.exports = {
+  list,
+  get,
+  create,
+  update,
+  remove,
+  listActive,
+  listFiltered,
+};

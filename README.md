@@ -248,6 +248,10 @@ Delete a payment method.
 ### `GET /payment-methods/active`
 
 List active payment methods where the blockchain supports wallet generation.
+
+### `GET /admin/payment-methods/filters`
+
+Filter payment methods by optional `blockchainId`, `cryptoId` or `status` query parameters. Returns matching rows sorted by ID ascending including blockchain and crypto data.
 ## Wallet Assignments
 
 ### `GET /wallet-assignments`
