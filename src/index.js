@@ -1,5 +1,4 @@
-require('dotenv').config();
-console.log('[DEBUG ENV] DB_USER:', process.env.DB_USER);
+
 const app = require('./app');
 const { init } = require('./models/sequelize');
 

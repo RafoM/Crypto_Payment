@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
 let sequelize;
 if (process.env.DB_DIALECT === 'sqlite') {
@@ -17,6 +18,7 @@ if (process.env.DB_DIALECT === 'sqlite') {
 }
 
 async function init() {
+    console.log('[DEBUG ENV] DB_USER:', process.env.DB_USER);
   if (process.env.NODE_ENV !== 'production') {
     await sequelize.sync({ alter: true });
   }
